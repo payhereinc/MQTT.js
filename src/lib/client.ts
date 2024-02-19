@@ -442,9 +442,9 @@ export default class MqttClient extends TypedEventEmitter<MqttClientEventCallbac
 
 	private _resubscribeTopics: ISubscriptionMap
 
-	private connackTimer: NodeJS.Timeout
+	private connackTimer?: number
 
-	private reconnectTimer: NodeJS.Timeout
+	private reconnectTimer?: number
 
 	private _storeProcessing: boolean
 
@@ -846,6 +846,8 @@ export default class MqttClient extends TypedEventEmitter<MqttClientEventCallbac
 		this.stream.setMaxListeners(1000)
 
 		clearTimeout(this.connackTimer)
+    console.log('connect :: setting up connackTimer : ', this.options.connectTimeout);
+    //@ts-ignore
 		this.connackTimer = setTimeout(() => {
 			this.log(
 				'!!connectTimeout hit!! Calling _cleanUp with force `true`',
@@ -1689,6 +1691,7 @@ export default class MqttClient extends TypedEventEmitter<MqttClientEventCallbac
 				'_setupReconnect :: setting reconnectTimer for %d ms',
 				this.options.reconnectPeriod,
 			)
+      //@ts-ignore
 			this.reconnectTimer = setInterval(() => {
 				this.log('reconnectTimer :: reconnect triggered!')
 				this._reconnect()

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
+/* eslint-disable */
 import _debug from 'debug'
 import url from 'url'
 import MqttClient, {
@@ -8,6 +8,23 @@ import MqttClient, {
 } from '../client'
 import IS_BROWSER from '../is-browser'
 import { StreamBuilder } from '../shared'
+
+// React Native might not have a process object, so we need to polyfill it
+if (typeof global.process === 'undefined') {
+  // eslint-disable-next-line no-global-assign
+	// @ts-ignore no-global-assign
+  global.process = {}
+}
+
+// We need set the value of process.title, which mqtt.js uses to determine if it's running inside a browser
+// like environment and thus knows it doesn't have access to NodeJS core modules like net, tls
+global.process.title = 'browser'
+
+// Legitimate polyfill for process.nextTick, necessary for Duplexify, which is used by mqtt-packet
+global.process.nextTick = setImmediate
+
+// Polyfill for Buffer, which is present in NodeJS core, but not in the React Native environment
+global.Buffer = global.Buffer || require('safe-buffer').Buffer
 
 const debug = _debug('mqttjs')
 
@@ -58,7 +75,7 @@ function connect(
 	brokerUrl: string | IClientOptions,
 	opts?: IClientOptions,
 ): MqttClient {
-	debug('connecting to an MQTT broker...')
+	console.log('connecting to an MQTT broker...')
 	if (typeof brokerUrl === 'object' && !opts) {
 		opts = brokerUrl
 		brokerUrl = ''

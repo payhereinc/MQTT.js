@@ -1,6 +1,3 @@
-import { clearTimeout as clearT, setTimeout as setT } from 'worker-timers'
-import isBrowser, { isWebWorker } from './is-browser'
-
 export default class PingTimer {
 	private keepalive: number
 
@@ -10,13 +7,9 @@ export default class PingTimer {
 
 	// dont directly assign globals to class props otherwise this throws in web workers: Uncaught TypeError: Illegal invocation
 	// See: https://stackoverflow.com/questions/9677985/uncaught-typeerror-illegal-invocation-in-chrome
-	private _setTimeout: typeof setT =
-		isBrowser && !isWebWorker
-			? setT
-			: (func, time) => setTimeout(func, time)
+	private _setTimeout = (func: TimerHandler, time?: number) => setTimeout(func, time);
 
-	private _clearTimeout: typeof clearT =
-		isBrowser && !isWebWorker ? clearT : (timer) => clearTimeout(timer)
+	private _clearTimeout = (timer: number) => clearTimeout(timer);
 
 	constructor(keepalive: number, checkPing: () => void) {
 		this.keepalive = keepalive * 1000
